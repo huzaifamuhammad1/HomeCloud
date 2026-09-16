@@ -1,0 +1,43 @@
+# Python / environments
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.coverage
+htmlcov/
+
+# macOS
+.DS_Store
+
+# HomeCloud private user data
+HomeCloudStorage/
+HomeCloudData/
+_CodeBackups/
+
+# Databases / runtime state
+*.db
+*.sqlite
+*.sqlite3
+
+# Secrets / certificates / env
+.env
+.env.*
+*.key
+*.pem
+*.crt
+*.p12
+*.pfx
+instance/
+
+# Logs / packaging
+*.log
+*.zip
+*.tar
+*.tar.gz
+
+# Editors
+.vscode/
+.idea/
+
+# Personal test uploads
+test_uploads/

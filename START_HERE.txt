@@ -1,0 +1,27 @@
+HOMECLOUD — START HERE
+
+You do not need to write code.
+
+MAC STEPS
+1. Put this entire "HomeCloud" folder on your Desktop.
+2. Open the HomeCloud folder.
+3. Double-click: 01_SETUP_HOMECLOUD.command
+4. macOS may ask for permission to open it. Allow it.
+5. Wait for "SETUP COMPLETE".
+6. Double-click: 02_RUN_HOMECLOUD.command
+7. Keep that Terminal window open.
+8. The Terminal will show:
+   - Mac URL: http://127.0.0.1:5050
+   - iPhone URL: http://YOUR-MAC-IP:5050
+9. Put your iPhone on the SAME trusted Wi-Fi as the Mac.
+10. Open Safari on the iPhone and type the iPhone URL.
+11. Tap "Choose a photo", select one photo, then "Upload to my laptop".
+12. On the Mac, open:
+    Desktop > HomeCloud > HomeCloudStorage > photos
+13. Your uploaded photo should be there.
+
+IMPORTANT
+- This first build is LOCAL ONLY.
+- Do not port-forward 5050.
+- Do not expose this prototype to the public internet.
+- The random-looking stored filename is intentional: HomeCloud never trusts a phone-supplied filename as a disk filename.

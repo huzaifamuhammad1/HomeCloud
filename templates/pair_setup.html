@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Pair a phone · HomeCloud</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+  <div class="setup-shell">
+    <a class="back-link" href="/">← Back to HomeCloud</a>
+
+    {% if error %}
+      <section class="pairing-panel">
+        <div class="pairing-error-icon">!</div>
+        <h1>Couldn’t create a secure QR code.</h1>
+        <p>{{ error }}</p>
+        <p class="muted-copy">Run the Stage 6 remote-access setup, then reload this page.</p>
+      </section>
+    {% else %}
+      <section class="pairing-panel">
+        <div class="eyebrow">SECURE DEVICE PAIRING</div>
+        <h1>Scan once.<br>Use it anywhere.</h1>
+        <p class="pairing-lead">
+          Scan this QR with your iPhone. It opens HomeCloud through your private
+          Tailscale HTTPS address, so the same paired app can work at home, university,
+          or on cellular.
+        </p>
+
+        <div class="qr-card">
+          <img src="{{ pairing.qr_data_url }}" alt="HomeCloud secure device pairing QR code">
+        </div>
+
+        <div class="pairing-status waiting" id="pairingStatus">
+          <span class="status-dot"></span>
+          <span id="pairingStatusText">Waiting for your iPhone…</span>
+        </div>
+
+        <div class="pairing-address">
+          <span>Private HTTPS address</span>
+          <strong>{{ pairing.public_url }}</strong>
+        </div>
+
+        <p class="pairing-security-copy">
+          This QR is single-use and expires in five minutes. HomeCloud itself listens
+          only on this Mac; Tailscale Serve provides the private encrypted HTTPS route.
+        </p>
+      </section>
+
+      <section class="devices-panel">
+        <div class="devices-heading">
+          <div>
+            <div class="mini-label">ACCESS</div>
+            <h2>Paired devices</h2>
+          </div>
+          <span class="device-count" id="deviceCount">—</span>
+        </div>
+
+        <div id="devicesList" class="devices-list"></div>
+      </section>
+
+      <script>
+        window.HOMECLOUD_PAIRING_ID = {{ pairing.pairing_id|tojson }};
+      </script>
+      <script src="{{ url_for('static', filename='js/pair_setup.js') }}"></script>
+    {% endif %}
+  </div>
+</body>
+</html>

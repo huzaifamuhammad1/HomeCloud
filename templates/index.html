@@ -1,0 +1,302 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#f4f6fb">
+
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="HomeCloud">
+
+  <title>HomeCloud</title>
+
+  <link rel="manifest" href="/manifest.webmanifest">
+  <link rel="apple-touch-icon" href="{{ url_for('static', filename='icons/apple-touch-icon.png') }}">
+  <link rel="icon" href="{{ url_for('static', filename='icons/icon-192.png') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+  <div class="app-shell">
+    <header class="topbar">
+      <a class="brand" href="/" aria-label="HomeCloud home">
+        <span class="brand-mark" aria-hidden="true">
+          <svg viewBox="0 0 32 32">
+            <path d="M10.6 24.5h12.1a6.2 6.2 0 0 0 .8-12.3 8.5 8.5 0 0 0-16.2 2.1A5.3 5.3 0 0 0 10.6 24.5Z"></path>
+          </svg>
+        </span>
+        <span>HomeCloud</span>
+      </a>
+
+      <div class="top-actions">
+        {% if local_admin %}
+        <a class="pair-button" href="/pair/setup">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M12 3 5.5 5.7v5.2c0 4.5 2.8 8.6 6.5 10.1 3.7-1.5 6.5-5.6 6.5-10.1V5.7L12 3Z"></path>
+            <path d="M9 12h6"></path>
+            <path d="M12 9v6"></path>
+          </svg>
+          Pair a phone
+        </a>
+        {% endif %}
+
+        <div class="server-pill" id="serverPill">
+          <span class="status-dot"></span>
+          <span id="statusText">Checking Mac…</span>
+        </div>
+      </div>
+    </header>
+
+    <main>
+      <section class="pair-gate hidden" id="pairGate">
+        <div class="lock-orb">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <rect x="5" y="10" width="14" height="10" rx="3"></rect>
+            <path d="M8 10V7a4 4 0 0 1 8 0v3"></path>
+          </svg>
+        </div>
+        <div class="eyebrow">DEVICE NOT PAIRED</div>
+        <h1>This phone needs permission.</h1>
+        <p>
+          On your Mac, open HomeCloud and choose <strong>Pair a phone</strong>.
+          Scan the QR code, then return here.
+        </p>
+        <div class="pair-note">
+          Your library stays hidden until this browser has a valid HomeCloud token.
+        </div>
+      </section>
+
+      <div id="authorizedApp" class="hidden">
+        <section class="hero-grid" id="homeSection">
+          <div class="hero-copy">
+            <div class="eyebrow">HOME SCREEN READY</div>
+            <h1>Your cloud,<br>in your pocket.</h1>
+            <p>
+              HomeCloud now has an install-like mobile shell, a proper app icon,
+              multi-file uploads, and paired-device access.
+            </p>
+
+            <button class="install-chip" id="installChip" type="button">
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <rect x="5" y="3" width="14" height="18" rx="3"></rect>
+                <path d="M9 7h6"></path>
+                <path d="M12 17h.01"></path>
+              </svg>
+              Add HomeCloud to Home Screen
+            </button>
+          </div>
+
+          <div class="security-card">
+            <div class="security-icon">
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M12 3 5.5 5.7v5.2c0 4.5 2.8 8.6 6.5 10.1 3.7-1.5 6.5-5.6 6.5-10.1V5.7L12 3Z"></path>
+                <path d="m9.2 12.2 1.8 1.8 4-4.3"></path>
+              </svg>
+            </div>
+            <div>
+              <div class="mini-label">THIS DEVICE</div>
+              <div class="security-title" id="deviceLabel">Checking device…</div>
+              <div class="security-copy">Paired token required for your library.</div>
+            </div>
+          </div>
+        </section>
+
+        <section class="stats-row">
+          <div class="storage-card">
+            <div class="storage-topline">
+              <span class="mini-label">HOME STORAGE</span>
+              <span id="storagePercent">—</span>
+            </div>
+            <div class="storage-number" id="storageUsed">Loading…</div>
+            <div class="storage-caption">indexed in HomeCloud</div>
+            <div class="meter"><div class="meter-fill" id="meterFill"></div></div>
+            <div class="storage-bottom">
+              <span id="itemCount">— items</span>
+              <span id="diskFree">— free on Mac</span>
+            </div>
+          </div>
+        </section>
+
+        <section class="action-row" id="uploadSection">
+          <label class="upload-button" for="fileInput">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M12 16V4"></path>
+              <path d="m7.5 8.5 4.5-4.5 4.5 4.5"></path>
+              <path d="M5 14.5v3.2A2.3 2.3 0 0 0 7.3 20h9.4a2.3 2.3 0 0 0 2.3-2.3v-3.2"></path>
+            </svg>
+            Upload photos or files
+          </label>
+          <input id="fileInput" type="file" multiple hidden>
+
+          <button class="refresh-button" id="refreshButton" type="button">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M20 6v5h-5"></path>
+              <path d="M4 18v-5h5"></path>
+              <path d="M6.1 9a7 7 0 0 1 11.6-2.6L20 11"></path>
+              <path d="M17.9 15a7 7 0 0 1-11.6 2.6L4 13"></path>
+            </svg>
+            Refresh
+          </button>
+        </section>
+
+        <section class="upload-status hidden" id="uploadStatus">
+          <div class="upload-status-copy">
+            <div>
+              <strong id="uploadStatusTitle">Uploading…</strong>
+              <span class="queue-copy" id="queueCopy"></span>
+            </div>
+            <span id="uploadStatusText">Preparing</span>
+          </div>
+          <div class="progress-track"><div id="progressBar" class="progress-bar"></div></div>
+        </section>
+
+        <section class="library-card" id="librarySection">
+          <div class="library-header">
+            <div>
+              <div class="mini-label">PROTECTED LIBRARY</div>
+              <h2>Recent files</h2>
+            </div>
+
+            <div class="segmented" role="tablist" aria-label="Filter files">
+              <button class="segment active" data-filter="all" type="button">All</button>
+              <button class="segment" data-filter="photos" type="button">Photos</button>
+              <button class="segment" data-filter="videos" type="button">Videos</button>
+              <button class="segment" data-filter="files" type="button">Files</button>
+            </div>
+          </div>
+
+          <div class="empty-state hidden" id="emptyState">
+            <div class="empty-icon">☁</div>
+            <strong>No files here yet</strong>
+            <span>Upload something and HomeCloud will index it.</span>
+          </div>
+
+          <div class="gallery" id="gallery"></div>
+        </section>
+
+        <div class="safety-note">
+          <strong>Stage 5:</strong>
+          Home Screen behavior is ready, but automatic background photo-library backup
+          still belongs to the later native-app stage.
+        </div>
+      </div>
+    </main>
+
+    <footer>
+      <span>HomeCloud · Stage 5</span>
+      <span>•</span>
+      <span>Install-like mobile experience</span>
+    </footer>
+  </div>
+
+  <nav class="mobile-nav hidden" id="mobileNav" aria-label="HomeCloud navigation">
+    <button type="button" data-scroll="homeSection" class="mobile-nav-item active">
+      <svg viewBox="0 0 24 24"><path d="m4 11 8-7 8 7v9H7v-6h10v6"></path></svg>
+      <span>Home</span>
+    </button>
+    <button type="button" data-scroll="uploadSection" class="mobile-nav-item">
+      <svg viewBox="0 0 24 24"><path d="M12 16V4"></path><path d="m7.5 8.5 4.5-4.5 4.5 4.5"></path><path d="M5 14.5v3.2A2.3 2.3 0 0 0 7.3 20h9.4a2.3 2.3 0 0 0 2.3-2.3v-3.2"></path></svg>
+      <span>Upload</span>
+    </button>
+    <button type="button" data-scroll="librarySection" class="mobile-nav-item">
+      <svg viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="14" rx="3"></rect><path d="m8 14 2.7-2.7L14 14.6l2-2 3 3"></path></svg>
+      <span>Library</span>
+    </button>
+    <button type="button" id="settingsNavButton" class="mobile-nav-item">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1-2.8 2.8-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.6V21h-4v-.1a1.7 1.7 0 0 0-1-1.6 1.7 1.7 0 0 0-1.9.3l-.1.1L4.2 17l.1-.1a1.7 1.7 0 0 0 .3-1.9A1.7 1.7 0 0 0 3 14H3v-4h.1a1.7 1.7 0 0 0 1.6-1 1.7 1.7 0 0 0-.3-1.9L4.2 7 7 4.2l.1.1a1.7 1.7 0 0 0 1.9.3A1.7 1.7 0 0 0 10 3h4a1.7 1.7 0 0 0 1 1.6 1.7 1.7 0 0 0 1.9-.3l.1-.1L19.8 7l-.1.1a1.7 1.7 0 0 0-.3 1.9 1.7 1.7 0 0 0 1.6 1h.1v4H21a1.7 1.7 0 0 0-1.6 1Z"></path></svg>
+      <span>Settings</span>
+    </button>
+  </nav>
+
+  <div class="toast hidden" id="toast" role="status" aria-live="polite"></div>
+
+  <div class="modal-backdrop hidden" id="installModal">
+    <div class="modal install-modal" role="dialog" aria-modal="true" aria-labelledby="installTitle">
+      <button class="modal-close" id="closeInstall" type="button" aria-label="Close">×</button>
+
+      <div class="app-icon-preview">
+        <img src="{{ url_for('static', filename='icons/apple-touch-icon.png') }}" alt="">
+      </div>
+
+      <div class="details-kicker">IPHONE HOME SCREEN</div>
+      <h3 id="installTitle">Install HomeCloud</h3>
+      <p class="install-copy">
+        In Safari, use the Share menu to place HomeCloud beside your normal apps.
+      </p>
+
+      <div class="install-steps">
+        <div><span>1</span><strong>Tap Share</strong><small>The square with the up arrow.</small></div>
+        <div><span>2</span><strong>Add to Home Screen</strong><small>Scroll the Share sheet if needed.</small></div>
+        <div><span>3</span><strong>Tap Add</strong><small>HomeCloud gets its own app icon.</small></div>
+      </div>
+
+      <div class="install-limit-note" id="secureContextNote">
+        On this local HTTP build, iPhone can launch HomeCloud from the Home Screen.
+        Full service-worker/offline behavior activates when we move HomeCloud onto HTTPS.
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-backdrop hidden" id="settingsModal">
+    <div class="modal settings-modal" role="dialog" aria-modal="true" aria-labelledby="settingsTitle">
+      <button class="modal-close" id="closeSettings" type="button" aria-label="Close">×</button>
+      <div class="details-kicker">THIS DEVICE</div>
+      <h3 id="settingsTitle">HomeCloud settings</h3>
+
+      <div class="settings-device-card">
+        <span class="settings-device-icon">✓</span>
+        <div>
+          <strong id="settingsDeviceName">Paired device</strong>
+          <small>Authorized to access this HomeCloud</small>
+        </div>
+      </div>
+
+      <button class="settings-action" id="openInstallFromSettings" type="button">
+        Add HomeCloud to Home Screen
+      </button>
+
+      <button class="settings-action danger" id="forgetDeviceButton" type="button">
+        Forget this browser
+      </button>
+
+      <p class="settings-footnote">
+        “Forget this browser” removes the saved token from this browser.
+        To revoke a device from the server, use the Mac’s Pair a phone screen.
+      </p>
+    </div>
+  </div>
+
+  <div class="modal-backdrop hidden" id="detailsModal">
+    <div class="modal details-modal" role="dialog" aria-modal="true" aria-labelledby="detailsTitle">
+      <button class="modal-close" id="closeDetails" type="button" aria-label="Close">×</button>
+      <div class="details-kicker">FILE RECORD</div>
+      <h3 id="detailsTitle">File details</h3>
+
+      <div class="details-grid">
+        <div class="detail-row"><span>Name</span><strong id="detailName">—</strong></div>
+        <div class="detail-row"><span>Type</span><strong id="detailType">—</strong></div>
+        <div class="detail-row"><span>Size</span><strong id="detailSize">—</strong></div>
+        <div class="detail-row"><span>Added</span><strong id="detailDate">—</strong></div>
+        <div class="detail-row"><span>Stored as</span><strong class="mono" id="detailStored">—</strong></div>
+        <div class="detail-row checksum-row"><span>SHA‑256</span><strong class="mono" id="detailChecksum">—</strong></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-backdrop hidden" id="deleteModal">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="deleteTitle">
+      <div class="modal-icon">!</div>
+      <h3 id="deleteTitle">Delete this file?</h3>
+      <p>This removes the real file from your Mac and its SQLite record.</p>
+      <div class="modal-actions">
+        <button class="modal-secondary" id="cancelDelete" type="button">Cancel</button>
+        <button class="modal-danger" id="confirmDelete" type="button">Delete</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="{{ url_for('static', filename='js/pwa.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/remote.js') }}"></script>
+</body>
+</html>
